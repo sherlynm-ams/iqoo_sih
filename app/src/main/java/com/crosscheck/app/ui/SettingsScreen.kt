@@ -140,6 +140,9 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit) {
                     TrustedPackages.SHELL in settings.trustedPackages,
                 ) { scope.launch { container.settings.setTrustedPackage(TrustedPackages.SHELL, it) } }
             }
+
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            SttSettingsSection(container)
             Spacer(Modifier.height(24.dp))
         }
     }

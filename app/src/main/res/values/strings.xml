@@ -85,4 +85,71 @@
     <!-- Foreground service that speaks SMS confirmations (SpeakService) -->
     <string name="tts_channel_name">Spoken confirmations</string>
     <string name="tts_fgs_title">Announcing payment…</string>
+
+    <!-- Phase 2: voice query (spoken answers resolve in the speech locale; UI labels are English) -->
+    <string name="voice_title">Voice query</string>
+    <string name="voice_tap_to_speak">Tap and ask</string>
+    <string name="voice_listening">Listening…</string>
+    <string name="voice_examples">\"Did Murugan pay 500 today?\" · \"How was today?\"</string>
+    <string name="voice_heard">Heard</string>
+    <string name="voice_parsed">Understood as</string>
+    <string name="voice_parsed_didpay">Payment from %1$s · %2$s · today</string>
+    <string name="voice_parsed_anyone">anyone</string>
+    <string name="voice_parsed_any_amount">any amount</string>
+    <string name="voice_parsed_digest">Today\'s digest</string>
+    <string name="voice_parsed_unknown">Not understood</string>
+    <string name="voice_answer">Answer</string>
+    <string name="voice_error_no_permission">Microphone permission is needed to ask by voice.</string>
+    <string name="voice_error_unavailable">Speech recognition is not available on this device. Use the typed query (debug) or install a recogniser.</string>
+    <string name="voice_error_no_language">No on-device recognition for the selected language. Download it in Settings or switch to English (India).</string>
+    <string name="voice_error_no_speech">Did not catch that. Tap and try again.</string>
+    <string name="voice_error_audio">Microphone error. Check that no other app is recording.</string>
+    <string name="voice_error_busy">The recogniser is busy. Try again in a moment.</string>
+    <string name="voice_error_generic">Could not listen. Try again.</string>
+    <string name="voice_open_settings">Open Settings</string>
+    <string name="voice_debug_title">Debug: run the same pipeline without a microphone</string>
+    <string name="voice_debug_type">Type a query</string>
+    <string name="voice_debug_run">Run</string>
+    <string name="voice_debug_seed">Seed a NoMatch claim</string>
+    <string name="voice_debug_seeded">Inserted %1$s (₹500, RAVI, nothing received)</string>
+
+    <!-- Spoken answers. yes: %1$s amount, %2$s payer, %3$s time. different: %1$s payer, %2$s received amounts, %3$s asked amount. -->
+    <string name="voice_answer_yes">Yes — %1$s received from %2$s at %3$s.</string>
+    <string name="voice_answer_no_name">No — nothing from %1$s today.</string>
+    <string name="voice_answer_no_amount">No — no payment of %1$s today.</string>
+    <string name="voice_answer_different">%1$s paid %2$s today, not %3$s.</string>
+    <string name="voice_answer_paid_list">%1$s paid %2$s today.</string>
+    <string name="voice_answer_unknown">Sorry, I did not understand. Try: did Murugan pay 500 today.</string>
+    <!-- digest: %1$s payments phrase, %2$s mismatches phrase, %3$s flagged amount -->
+    <string name="voice_digest">%1$s, %2$s, %3$s flagged today.</string>
+    <plurals name="voice_digest_payments">
+        <item quantity="one">%d payment confirmed</item>
+        <item quantity="other">%d payments confirmed</item>
+    </plurals>
+    <plurals name="voice_digest_mismatches">
+        <item quantity="one">%d mismatch</item>
+        <item quantity="other">%d mismatches</item>
+    </plurals>
+
+    <!-- Office Kit export -->
+    <string name="log_export_today">Export today</string>
+    <string name="export_done">Wrote %1$d files to %2$s</string>
+    <string name="export_failed">Export failed. Check storage and try again.</string>
+    <string name="export_share_title">Share today\'s reports</string>
+
+    <!-- Settings: on-device speech recognition -->
+    <string name="settings_stt">On-device speech recognition</string>
+    <string name="settings_stt_engine_on_device">Engine: on-device recogniser</string>
+    <string name="settings_stt_engine_default">Engine: default recogniser (offline preferred)</string>
+    <string name="settings_stt_none">No speech recogniser installed on this device.</string>
+    <string name="settings_stt_api">Language status needs Android 13 or newer.</string>
+    <string name="settings_stt_checking">Checking…</string>
+    <string name="settings_stt_installed">Installed on device</string>
+    <string name="settings_stt_downloadable">Available to download</string>
+    <string name="settings_stt_pending">Downloading…</string>
+    <string name="settings_stt_online">Online only — not used (no network)</string>
+    <string name="settings_stt_unsupported">Not supported by this recogniser</string>
+    <string name="settings_stt_unknown">Unknown</string>
+    <string name="settings_stt_download">Download</string>
+    <string name="settings_stt_refresh">Refresh status</string>
 </resources>

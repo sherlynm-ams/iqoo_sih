@@ -19,6 +19,10 @@
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
+        <!-- Lets SpeechRecognizer.isRecognitionAvailable() see the recogniser service on API 30+. -->
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
     </queries>
 
     <application
@@ -59,9 +63,21 @@
             </intent-filter>
         </service>
 
+        <!-- shortService FGS that speaks SMS confirmations inside the receiver's ~20 s background window. -->
         <service
             android:name=".voice.SpeakService"
             android:exported="false"
             android:foregroundServiceType="shortService" />
+
+        <!-- Office Kit export: shares files under external-files-dir/reports via content:// URIs (no network). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 </manifest>

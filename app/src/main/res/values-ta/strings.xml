@@ -17,4 +17,21 @@
     <string name="reason_nothing_received">இந்த கோரிக்கைக்கு எதுவும் பெறப்படவில்லை</string>
     <string name="reason_timestamp_mismatch">நேரம் பொருந்தவில்லை</string>
     <string name="reason_pending">பணம் இன்னும் நிலுவையில் உள்ளது</string>
+
+    <!-- Phase 2: spoken voice-query answers. yes: %1$s amount, %2$s payer, %3$s time. -->
+    <string name="voice_answer_yes">ஆம் — %2$s அனுப்பிய %1$s %3$s மணிக்கு பெறப்பட்டது.</string>
+    <string name="voice_answer_no_name">இல்லை — %1$s இடமிருந்து இன்று எதுவும் வரவில்லை.</string>
+    <string name="voice_answer_no_amount">இல்லை — இன்று %1$s பணம் எதுவும் வரவில்லை.</string>
+    <string name="voice_answer_different">%1$s இன்று %2$s கொடுத்தார், %3$s அல்ல.</string>
+    <string name="voice_answer_paid_list">%1$s இன்று %2$s கொடுத்தார்.</string>
+    <string name="voice_answer_unknown">மன்னிக்கவும், புரியவில்லை. உதாரணம்: முருகன் 500 கொடுத்தாரா.</string>
+    <string name="voice_digest">இன்று %1$s, %2$s, %3$s குறியிடப்பட்டது.</string>
+    <plurals name="voice_digest_payments">
+        <item quantity="one">%d பணம் உறுதி செய்யப்பட்டது</item>
+        <item quantity="other">%d பணங்கள் உறுதி செய்யப்பட்டன</item>
+    </plurals>
+    <plurals name="voice_digest_mismatches">
+        <item quantity="one">%d பொருத்தமின்மை</item>
+        <item quantity="other">%d பொருத்தமின்மைகள்</item>
+    </plurals>
 </resources>

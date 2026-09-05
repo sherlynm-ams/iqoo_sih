@@ -126,3 +126,66 @@ Change the speech locale from the Settings screen (gear icon) — Tamil / Englis
 - `Get-ChildItem … -ErrorAction SilentlyContinue` still makes the tool report exit 1; wrap in `try/catch` if it matters.
 - `adb exec-out … > file` and `>` in general re-encode bytes (BOM + UTF-8) — never redirect binary output.
 - Git Bash also works for Gradle: `JAVA_HOME="/d/Android Studio/jbr" ./gradlew assembleDebug`.
+
+## Phase 2 — voice & export
+
+Verified on 2026-09-06 on a second AVD so two agents could work at once: `Pixel_7a` (API 36, Google Play x86_64) on **`emulator-5556`**. When two emulators run, every adb call needs `-s emulator-5556` (the emulator's own post-boot adb calls fail with "more than one emulator" — harmless).
+
+### Boot a second emulator on a fixed port
+
+```powershell
+& "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -avd Pixel_7a -no-snapshot-load -no-boot-anim -no-audio -no-window -gpu swiftshader_indirect -no-metrics -port 5556
+adb -s emulator-5556 wait-for-device
+adb -s emulator-5556 shell getprop sys.boot_completed     # poll until 1
+```
+
+If `adb devices` keeps saying `emulator-5556 unauthorized` after boot (the pubkey handshake did not take), a device-scoped reconnect fixes it without touching the other emulator: `adb -s emulator-5556 reconnect`.
+
+### Seed today's data
+
+Alphanumeric SMS senders work on this emulator version (so `senderTrusted` can be true on the SMS path):
+
+```powershell
+adb -s emulator-5556 emu sms send VM-SBIINB "Rs.500.00 credited to A/c XX1234 on 06-09-26 by UPI Ref No 426112345678 from MURUGAN. -SBI"
+adb -s emulator-5556 shell "cmd notification post -S bigtext -t 'HDFC Bank' tag1 'Rs.750.00 credited to a/c XX1234 via UPI Ref 624912345678 from KUMAR'"
+```
+
+A **NoMatch claim** (so the digest / flagged export have a mismatch): open the Voice screen (mic button on the Log screen) and tap **"Seed a NoMatch claim"** in the debug panel — debug builds only; inserts a ₹500 / RAVI / `NOTHING_RECEIVED` receipt with `extractorBackend=debug-seed`.
+
+### Voice query without a microphone (debug builds)
+
+The Voice screen's debug panel ("Type a query" + **Run**) sends typed text through the same `VoiceQueryService` pipeline as the microphone. From adb:
+
+```powershell
+adb -s emulator-5556 shell input tap 975 2305                     # mic button on the Log screen (1080x2400)
+adb -s emulator-5556 shell input tap 540 1075                     # the text field
+adb -s emulator-5556 shell input text "did%sMurugan%spay%s500%stoday"   # %s = space
+adb -s emulator-5556 shell input keyevent 4                       # close the keyboard (Run moves when it is open)
+adb -s emulator-5556 shell input tap 158 1970                     # Run
+adb -s emulator-5556 logcat -d -s CrossCheckSTT CrossCheckTTS
+```
+
+Coordinates drift with content; when in doubt `adb -s emulator-5556 shell uiautomator dump /sdcard/ui.xml` and read the `bounds` of the node whose `text` is `Run`. Evidence lines: `CrossCheckSTT: query transcript="…" parsed=DidPay(name=Murugan, amountPaise=50000) answer="…"` then `CrossCheckTTS: onStart/onDone id=cc-N text="…"`. Try `how was today`, `Murugan 500 vandhucha`, `murugan ne 500 diya kya`, `இன்று எப்படி`.
+
+### On-device STT status
+
+Open Settings (gear) — the "On-device speech recognition" section runs `checkRecognitionSupport` for ta-IN / en-IN / hi-IN and logs one line per locale:
+
+```powershell
+adb -s emulator-5556 logcat -d -s CrossCheckSTT | Select-String checkRecognitionSupport
+```
+
+On the API 36 Play image: `installed=[en-US]`, `en-IN`/`hi-IN` downloadable, **`ta-IN` not listed at all**. Tapping the real mic with `ta-IN` therefore logs `onError code=12 (LANGUAGE_NOT_SUPPORTED)` and the screen shows the "download it in Settings or switch to English (India)" card. Tamil **TTS**, by contrast, was available (`CrossCheckTTS: locale requested=ta-IN using=ta-IN`).
+
+### Office Kit export
+
+Tap the share icon ("Export today") in the Log top bar. Files land in the app's external files dir and the system share sheet opens (~2 s on the emulator with swiftshader; `ActivityTaskManager: Displayed com.android.intentresolver/.ChooserActivityLauncher … +1s896ms`):
+
+```powershell
+adb -s emulator-5556 logcat -d -s CrossCheckExport
+adb -s emulator-5556 shell ls -l /sdcard/Android/data/com.crosscheck.app/files/reports/
+adb -s emulator-5556 shell cat /sdcard/Android/data/com.crosscheck.app/files/reports/*-summary.txt
+adb -s emulator-5556 pull /sdcard/Android/data/com.crosscheck.app/files/reports/ "C:\path\to\reports"
+```
+
+Screenshot the share sheet while it is up (`adb -s emulator-5556 shell "dumpsys activity activities | grep topResumedActivity"` shows `com.android.intentresolver/.ChooserActivityLauncher`), then `input keyevent 4` to dismiss it.
