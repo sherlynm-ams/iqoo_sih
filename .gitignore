@@ -1,0 +1,36 @@
+# Gradle
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Android / IDE
+local.properties
+*.iml
+.idea/
+.cxx/
+captures/
+.externalNativeBuild/
+*.apk
+*.aab
+*.ap_
+*.dex
+output-metadata.json
+
+# Kotlin / misc
+*.log
+.kotlin/
+.DS_Store
+Thumbs.db
+
+# Models (pushed to device via adb, never committed)
+models/
+*.task
+*.tflite
+*.litertlm
+*.gguf
+*.pte
+
+# Test artefacts
+shot*.png
+/artefacts/
