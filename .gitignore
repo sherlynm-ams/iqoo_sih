@@ -34,3 +34,6 @@ models/
 # Test artefacts
 shot*.png
 /artefacts/
+
+# Claude Code agent worktrees (never commit)
+.claude/

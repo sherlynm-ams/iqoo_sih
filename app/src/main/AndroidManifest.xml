@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Mode 1 signal sources. No INTERNET permission anywhere (SPEC section 4). -->
+    <!-- Phase 2 libraries (ML Kit / Play-services base) merge INTERNET in; strip it so the APK never asks for network. -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Mode 2 (camera) and voice query (mic) - requested at runtime from the permissions gate. -->
@@ -32,6 +35,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.CrossCheck">
+
+        <!-- LiteRT-LM GPU backend (OpenCL) - optional so x86_64 / OpenCL-less devices still install (SPEC section 4). -->
+        <uses-native-library android:name="libOpenCL.so" android:required="false" />
+        <uses-native-library android:name="libvndksupport.so" android:required="false" />
 
         <activity
             android:name=".ui.MainActivity"

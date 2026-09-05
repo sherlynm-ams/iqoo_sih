@@ -152,4 +152,63 @@
     <string name="settings_stt_unknown">Unknown</string>
     <string name="settings_stt_download">Download</string>
     <string name="settings_stt_refresh">Refresh status</string>
+
+    <!-- Phase 2: Verify screen (Mode 2) -->
+    <string name="verify_title">Verify a claim</string>
+    <string name="verify_hint">Point the camera at the customer\'s payment screen. It captures on its own once an amount and a UTR are readable, or tap Capture.</string>
+    <string name="verify_capture">Capture</string>
+    <string name="verify_extracting">Reading the screen…</string>
+    <string name="verify_backend">Extractor: %1$s</string>
+    <string name="verify_camera_unavailable">Camera unavailable: %1$s</string>
+    <string name="verify_camera_permission">Camera permission is needed to verify a claim.</string>
+    <string name="verify_grant_camera">Grant camera access</string>
+    <string name="verify_read_failed">Could not read a payment screen. Reduce glare, fill the frame and try again.</string>
+    <string name="verify_view_receipt">View receipt</string>
+    <string name="verify_again">Verify another</string>
+    <string name="verify_use_fixture">Fixture image</string>
+    <string name="verify_run_suite">Run suite</string>
+    <string name="verify_suite_running">Running fixture suite…</string>
+    <string name="verify_suite_result">Fixture suite: %1$d/%2$d PASS (logcat tag CrossCheckFixture)</string>
+    <string name="verify_suite_missing">No fixtures found. Push them to /sdcard/Download/crosscheck-fixtures/ and grant READ_MEDIA_IMAGES.</string>
+    <string name="verify_repeat_note">This payer has failed verification %1$d time(s) before.</string>
+    <string name="field_amount">Amount</string>
+    <string name="field_utr">UTR</string>
+    <string name="field_app">App</string>
+    <string name="field_status">Status on screen</string>
+    <string name="field_time">Claimed time</string>
+    <string name="field_payee">Payee</string>
+    <string name="field_payer">Payer</string>
+    <string name="field_other_ids">Other IDs</string>
+    <string name="field_backend">Extractor backend</string>
+    <string name="field_none">—</string>
+    <string name="app_gpay">Google Pay</string>
+    <string name="app_phonepe">PhonePe</string>
+    <string name="app_unknown">Unknown app</string>
+    <string name="status_success">Success</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_failed">Failed</string>
+    <string name="status_unknown">Unknown</string>
+
+    <!-- Phase 2: Receipt screen -->
+    <string name="receipt_title">Verification receipt</string>
+    <string name="receipt_claim_id">Claim #%1$d</string>
+    <string name="receipt_created">Verified at</string>
+    <string name="receipt_verdict">Verdict</string>
+    <string name="receipt_reason">Reason</string>
+    <string name="receipt_payer_key">Payer key</string>
+    <string name="receipt_key_kind">Key kind</string>
+    <string name="receipt_not_found">Receipt not found.</string>
+    <string name="receipt_footer">Verdict derived only from this phone\'s own payment log. No image analysis, nothing sent anywhere.</string>
+
+    <!-- Phase 2: Settings additions -->
+    <string name="settings_extractor">Claim extractor</string>
+    <string name="settings_extractor_auto">Auto (on-device VLM when available, else OCR)</string>
+    <string name="settings_extractor_vlm">VLM — Gemma 4 E2B via LiteRT-LM (GPU)</string>
+    <string name="settings_extractor_ocr">OCR — ML Kit text recognition</string>
+    <string name="settings_model_path">Model file: %1$s</string>
+    <string name="settings_model_present">Model file found</string>
+    <string name="settings_model_absent">Model file not found (OCR will be used)</string>
+    <string name="settings_import_model">Import model file (debug)</string>
+    <string name="settings_import_done">Model imported to %1$s</string>
+    <string name="settings_import_failed">Import failed: %1$s</string>
 </resources>
