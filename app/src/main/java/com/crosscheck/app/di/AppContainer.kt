@@ -10,10 +10,17 @@ import com.crosscheck.app.data.RoomClaimRepository
 import com.crosscheck.app.data.RoomFlaggedVpaRepository
 import com.crosscheck.app.data.RoomPaymentRepository
 import com.crosscheck.app.data.SettingsRepository
+import com.crosscheck.app.data.SpeechLocales
+import com.crosscheck.app.export.ReportExporter
 import com.crosscheck.app.signal.PaymentIngestor
 import com.crosscheck.app.verify.Reconciler
 import com.crosscheck.app.verify.VerificationService
+import com.crosscheck.app.voice.Listener
+import com.crosscheck.app.voice.LocalizedStrings
+import com.crosscheck.app.voice.QueryAnswerer
 import com.crosscheck.app.voice.Speaker
+import com.crosscheck.app.voice.VoiceQueryService
+import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -37,6 +44,14 @@ class AppContainer(context: Context) {
     val ingestor: PaymentIngestor = PaymentIngestor(payments, speaker)
     val reconciler: Reconciler = Reconciler()
     val verification: VerificationService = VerificationService(payments, claims, flaggedVpas, reconciler)
+
+    // Phase 2: voice query + Office Kit export. Spoken answers resolve in the speech locale the TTS engine is using.
+    val listener: Listener = Listener(appContext, settings)
+    val speechStrings: LocalizedStrings =
+        LocalizedStrings(appContext) { speaker.activeLocale ?: Locale.forLanguageTag(SpeechLocales.DEFAULT) }
+    val answerer: QueryAnswerer = QueryAnswerer(speechStrings)
+    val voiceQuery: VoiceQueryService = VoiceQueryService(payments, claims, answerer, speak = { speaker.speak(it) })
+    val exporter: ReportExporter = ReportExporter(appContext, payments, claims, answerer)
 
     init {
         appScope.launch {

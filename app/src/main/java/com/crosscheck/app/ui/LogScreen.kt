@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -89,6 +90,8 @@ fun LogScreen(
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val dumpedMessage = stringResource(R.string.log_dumped)
+    val exportedMessage = stringResource(R.string.export_done)
+    val exportFailedMessage = stringResource(R.string.export_failed)
 
     Scaffold(
         topBar = {
@@ -104,6 +107,20 @@ fun LogScreen(
                         }) {
                             Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.log_dump_db))
                         }
+                    }
+                    IconButton(onClick = {
+                        scope.launch {
+                            val export = runCatching { container.exporter.exportToday() }.getOrNull()
+                            if (export == null) {
+                                snackbar.showSnackbar(exportFailedMessage)
+                            } else {
+                                // Share sheet first; showSnackbar suspends until the snackbar is gone.
+                                context.startActivity(container.exporter.shareIntent(export))
+                                snackbar.showSnackbar(String.format(exportedMessage, export.files.size, export.directory?.absolutePath ?: ""))
+                            }
+                        }
+                    }) {
+                        Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.log_export_today))
                     }
                     IconButton(onClick = onPermissions) {
                         Icon(

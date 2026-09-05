@@ -42,10 +42,10 @@ fun CrossCheckNavHost(container: AppContainer) {
             )
         }
         composable(Routes.VOICE) {
-            PlaceholderScreen(
-                titleRes = R.string.placeholder_voice_title,
-                bodyRes = R.string.placeholder_voice_body,
+            VoiceScreen(
+                container = container,
                 onBack = { nav.popBackStack() },
+                onSettings = { nav.navigate(Routes.SETTINGS) },
             )
         }
     }

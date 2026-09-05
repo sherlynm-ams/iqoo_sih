@@ -17,4 +17,21 @@
     <string name="reason_nothing_received">इस दावे के लिए कुछ प्राप्त नहीं हुआ</string>
     <string name="reason_timestamp_mismatch">समय मेल नहीं खाता</string>
     <string name="reason_pending">भुगतान अभी भी लंबित है</string>
+
+    <!-- Phase 2: spoken voice-query answers. yes: %1$s amount, %2$s payer, %3$s time. -->
+    <string name="voice_answer_yes">हाँ — %2$s से %1$s %3$s बजे प्राप्त हुए.</string>
+    <string name="voice_answer_no_name">नहीं — %1$s से आज कुछ नहीं आया.</string>
+    <string name="voice_answer_no_amount">नहीं — आज %1$s का कोई भुगतान नहीं आया.</string>
+    <string name="voice_answer_different">%1$s ने आज %2$s दिए, %3$s नहीं.</string>
+    <string name="voice_answer_paid_list">%1$s ने आज %2$s दिए.</string>
+    <string name="voice_answer_unknown">माफ़ कीजिए, समझ नहीं आया. उदाहरण: मुरुगन ने 500 दिया क्या.</string>
+    <string name="voice_digest">आज %1$s, %2$s, %3$s फ़्लैग किए गए.</string>
+    <plurals name="voice_digest_payments">
+        <item quantity="one">%d भुगतान की पुष्टि हुई</item>
+        <item quantity="other">%d भुगतानों की पुष्टि हुई</item>
+    </plurals>
+    <plurals name="voice_digest_mismatches">
+        <item quantity="one">%d बेमेल</item>
+        <item quantity="other">%d बेमेल</item>
+    </plurals>
 </resources>
