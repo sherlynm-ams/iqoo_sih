@@ -52,6 +52,10 @@ import com.crosscheck.app.data.TrustedPackages
 import com.crosscheck.app.di.AppContainer
 import com.crosscheck.app.signal.NotificationListenerSource
 import kotlinx.coroutines.launch
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import com.crosscheck.app.data.ExtractorSettings
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,8 +71,10 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit) {
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { }
+    val snackbar = remember { SnackbarHostState() }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.settings_title)) },
@@ -140,6 +146,10 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit) {
                     TrustedPackages.SHELL in settings.trustedPackages,
                 ) { scope.launch { container.settings.setTrustedPackage(TrustedPackages.SHELL, it) } }
             }
+
+            // Phase 2: Mode 2 extractor backend (SPEC section 1 Settings) + model file status / debug import.
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            ExtractorSection(container = container, settings = settings, snackbar = snackbar)
             Spacer(Modifier.height(24.dp))
         }
     }
@@ -164,6 +174,53 @@ private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Un
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(label, modifier = Modifier.weight(1f))
         Switch(checked = checked, onCheckedChange = onChange)
+    }
+}
+
+@Composable
+private fun ExtractorSection(container: AppContainer, settings: Settings, snackbar: SnackbarHostState) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var modelPresent by remember(settings.vlmModelPath) { mutableStateOf(File(settings.vlmModelPath).isFile) }
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val result = container.importModel(uri)
+                modelPresent = result.isSuccess
+                snackbar.showSnackbar(
+                    result.fold(
+                        onSuccess = { context.getString(R.string.settings_import_done, it) },
+                        onFailure = { context.getString(R.string.settings_import_failed, it.message ?: it.javaClass.simpleName) },
+                    ),
+                )
+            }
+        }
+    }
+
+    Text(stringResource(R.string.settings_extractor), style = MaterialTheme.typography.titleMedium)
+    LocaleOption(ExtractorSettings.MODE_AUTO, R.string.settings_extractor_auto, settings.extractorMode) {
+        scope.launch { container.settings.setExtractorMode(it) }
+    }
+    LocaleOption(ExtractorSettings.MODE_VLM, R.string.settings_extractor_vlm, settings.extractorMode) {
+        scope.launch { container.settings.setExtractorMode(it) }
+    }
+    LocaleOption(ExtractorSettings.MODE_OCR, R.string.settings_extractor_ocr, settings.extractorMode) {
+        scope.launch { container.settings.setExtractorMode(it) }
+    }
+    Text(
+        stringResource(R.string.settings_model_path, settings.vlmModelPath),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Text(
+        stringResource(if (modelPresent) R.string.settings_model_present else R.string.settings_model_absent),
+        style = MaterialTheme.typography.bodyMedium,
+        color = if (modelPresent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+    )
+    if (BuildConfig.DEBUG) {
+        OutlinedButton(onClick = { importLauncher.launch(arrayOf("*/*")) }) {
+            Text(stringResource(R.string.settings_import_model))
+        }
     }
 }
 

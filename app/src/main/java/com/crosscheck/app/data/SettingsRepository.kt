@@ -55,11 +55,23 @@ object TrustedPackages {
     }
 }
 
+/** Mode 2 extractor settings (SPEC section 1 Settings: auto / VLM / OCR-fallback; section 4 model path). */
+object ExtractorSettings {
+    const val MODE_AUTO = "AUTO"
+    const val MODE_VLM = "VLM"
+    const val MODE_OCR = "OCR"
+    val MODES = listOf(MODE_AUTO, MODE_VLM, MODE_OCR)
+    const val DEFAULT_MODEL_PATH = "/data/local/tmp/llm/gemma-4-E2B-it.litertlm"
+    const val MODEL_FILE_NAME = "gemma-4-E2B-it.litertlm"
+}
+
 data class Settings(
     val speechLocale: String = SpeechLocales.DEFAULT,
     val smsSourceEnabled: Boolean = true,
     val notificationSourceEnabled: Boolean = true,
     val trustedPackages: Set<String> = TrustedPackages.DEFAULT,
+    val extractorMode: String = ExtractorSettings.MODE_AUTO,
+    val vlmModelPath: String = ExtractorSettings.DEFAULT_MODEL_PATH,
 )
 
 private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -73,6 +85,8 @@ class SettingsRepository(context: Context) {
             smsSourceEnabled = p[KEY_SMS] ?: true,
             notificationSourceEnabled = p[KEY_NOTIFICATION] ?: true,
             trustedPackages = p[KEY_TRUSTED] ?: TrustedPackages.DEFAULT,
+            extractorMode = p[KEY_EXTRACTOR_MODE] ?: ExtractorSettings.MODE_AUTO,
+            vlmModelPath = p[KEY_MODEL_PATH] ?: ExtractorSettings.DEFAULT_MODEL_PATH,
         )
     }
 
@@ -85,8 +99,12 @@ class SettingsRepository(context: Context) {
         val cur = p[KEY_TRUSTED] ?: TrustedPackages.DEFAULT
         p[KEY_TRUSTED] = if (trusted) cur + pkg else cur - pkg
     }
+    suspend fun setExtractorMode(mode: String) = store.edit { it[KEY_EXTRACTOR_MODE] = mode }
+    suspend fun setVlmModelPath(path: String) = store.edit { it[KEY_MODEL_PATH] = path }
 
     private companion object {
+        val KEY_EXTRACTOR_MODE = stringPreferencesKey("extractor_mode")
+        val KEY_MODEL_PATH = stringPreferencesKey("vlm_model_path")
         val KEY_LOCALE = stringPreferencesKey("speech_locale")
         val KEY_SMS = booleanPreferencesKey("source_sms")
         val KEY_NOTIFICATION = booleanPreferencesKey("source_notification")

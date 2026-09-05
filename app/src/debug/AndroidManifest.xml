@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+      Debug-only: lets the "Run fixture suite" action read the PNGs pushed to
+      /sdcard/Download/crosscheck-fixtures/ (scoped storage otherwise denies a direct-path read).
+      Grant with: adb shell pm grant com.crosscheck.app android.permission.READ_MEDIA_IMAGES
+      Release builds do not carry this permission.
+    -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+</manifest>

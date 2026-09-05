@@ -37,10 +37,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
@@ -48,6 +44,15 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        // Kotlin 2.3 warns that constructor-property annotations (@StringRes val x) will also target the
+        // field in a future release; opting into that future default now silences it without touching code.
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
 }
 
@@ -71,6 +76,11 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.android)
+    // Mode 2: camera capture + on-device OCR fallback (bundled Latin model, no Play-services download).
+    implementation(libs.bundles.camerax)
+    implementation(libs.mlkit.text.recognition)
+    // Mode 2 primary backend: LiteRT-LM + Gemma 4 E2B (arm64 + OpenCL only; fails soft elsewhere).
+    implementation(libs.litertlm.android)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 

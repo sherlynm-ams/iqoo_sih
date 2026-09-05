@@ -1,8 +1,12 @@
 [versions]
 # Toolchain (SPEC section 4 - all cached locally)
 agp = "8.9.1"
-kotlin = "2.1.0"
-ksp = "2.1.0-1.0.29"
+# Kotlin 2.3.x is required to read LiteRT-LM's binaries (0.16.1 = Kotlin 2.3.0 metadata, 0.17.0 = 2.4.0;
+# the 2.1.0 compiler rejects both). 2.3.10 compiler + build-tools were already in the local cache.
+kotlin = "2.3.10"
+# KSP dropped the "<kotlin>-<ksp>" scheme at 2.3.0. 2.3.10 refuses AGP < 8.10 ("minimum supported AGP
+# version is 8.10.0"), and AGP 8.10+ needs a Gradle 8.13 download, so use the newest 2.3.x that still runs on AGP 8.9.1.
+ksp = "2.3.5"
 # AndroidX / Jetpack
 coreKtx = "1.15.0"
 activityCompose = "1.10.1"
@@ -15,6 +19,8 @@ coroutines = "1.10.1"
 camerax = "1.4.2"
 # ML Kit on-device text recognition (bundled model) - Phase 2 OCR fallback backend
 mlkitTextRecognition = "16.0.1"
+# LiteRT-LM Kotlin API (SPEC section 4: VLM runtime, Gemma 4 E2B). Pin 0.16.1 if 0.17.0 misbehaves.
+litertlm = "0.17.0"
 # Test
 junit = "4.13.2"
 
@@ -42,6 +48,7 @@ androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", 
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
 mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitTextRecognition" }
+litertlm-android = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertlm" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [bundles]
