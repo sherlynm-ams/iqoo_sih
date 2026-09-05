@@ -1,0 +1,162 @@
+[
+  {
+    "file": "gpay_genuine.png",
+    "app": "gpay",
+    "case": "genuine",
+    "expected": {
+      "amountPaise": 50000,
+      "utr": "426112345678",
+      "otherIds": ["CICAgKDx1b3fSA"],
+      "status": "success",
+      "timestampText": "6 Sept 2026, 12:41 pm",
+      "payeeUpiId": "sherwin@oksbi",
+      "payerName": "MURUGAN",
+      "payerBankMask": "XX4321"
+    },
+    "expectedVerdict": "Match"
+  },
+  {
+    "file": "gpay_wrong_utr.png",
+    "app": "gpay",
+    "case": "fake_wrong_utr",
+    "expected": {
+      "amountPaise": 50000,
+      "utr": "519876543210",
+      "otherIds": ["CICAgMzQ9pXbQg"],
+      "status": "success",
+      "timestampText": "6 Sept 2026, 12:41 pm",
+      "payeeUpiId": "sherwin@oksbi",
+      "payerName": "MURUGAN",
+      "payerBankMask": "XX4321"
+    },
+    "expectedVerdict": "NoMatch(WRONG_UTR)"
+  },
+  {
+    "file": "gpay_wrong_amount.png",
+    "app": "gpay",
+    "case": "fake_wrong_amount",
+    "expected": {
+      "amountPaise": 500000,
+      "utr": "426112345678",
+      "otherIds": ["CICAgKDx1b3fSA"],
+      "status": "success",
+      "timestampText": "6 Sept 2026, 12:41 pm",
+      "payeeUpiId": "sherwin@oksbi",
+      "payerName": "MURUGAN",
+      "payerBankMask": "XX4321"
+    },
+    "expectedVerdict": "NoMatch(WRONG_AMOUNT)"
+  },
+  {
+    "file": "gpay_pending.png",
+    "app": "gpay",
+    "case": "pending",
+    "expected": {
+      "amountPaise": 50000,
+      "utr": null,
+      "otherIds": ["CICAgLm2c7vXRw"],
+      "status": "pending",
+      "timestampText": "6 Sept 2026, 12:41 pm",
+      "payeeUpiId": "sherwin@oksbi",
+      "payerName": "MURUGAN",
+      "payerBankMask": "XX4321"
+    },
+    "expectedVerdict": "NoMatch(PENDING)"
+  },
+  {
+    "file": "phonepe_genuine.png",
+    "app": "phonepe",
+    "case": "genuine",
+    "expected": {
+      "amountPaise": 50000,
+      "utr": "426112345678",
+      "otherIds": ["T2609061241123456789012"],
+      "status": "success",
+      "timestampText": "06 Sep 2026, 12:41 pm",
+      "payeeUpiId": "sherwin@ybl",
+      "payerName": null,
+      "payerBankMask": "XXXXXX4321"
+    },
+    "expectedVerdict": "Match"
+  },
+  {
+    "file": "phonepe_wrong_utr.png",
+    "app": "phonepe",
+    "case": "fake_wrong_utr",
+    "expected": {
+      "amountPaise": 50000,
+      "utr": "519876543210",
+      "otherIds": ["T2609061240987654321098"],
+      "status": "success",
+      "timestampText": "06 Sep 2026, 12:41 pm",
+      "payeeUpiId": "sherwin@ybl",
+      "payerName": null,
+      "payerBankMask": "XXXXXX4321"
+    },
+    "expectedVerdict": "NoMatch(WRONG_UTR)"
+  },
+  {
+    "file": "phonepe_wrong_amount.png",
+    "app": "phonepe",
+    "case": "fake_wrong_amount",
+    "expected": {
+      "amountPaise": 500000,
+      "utr": "426112345678",
+      "otherIds": ["T2609061241123456789012"],
+      "status": "success",
+      "timestampText": "06 Sep 2026, 12:41 pm",
+      "payeeUpiId": "sherwin@ybl",
+      "payerName": null,
+      "payerBankMask": "XXXXXX4321"
+    },
+    "expectedVerdict": "NoMatch(WRONG_AMOUNT)"
+  },
+  {
+    "file": "phonepe_pending.png",
+    "app": "phonepe",
+    "case": "pending",
+    "expected": {
+      "amountPaise": 50000,
+      "utr": null,
+      "otherIds": ["T2609061241555555555555"],
+      "status": "pending",
+      "timestampText": "06 Sep 2026, 12:41 pm",
+      "payeeUpiId": "sherwin@ybl",
+      "payerName": null,
+      "payerBankMask": "XXXXXX4321"
+    },
+    "expectedVerdict": "NoMatch(PENDING)"
+  },
+  {
+    "file": "gpay_genuine_photo.png",
+    "app": "gpay",
+    "case": "genuine_photo",
+    "expected": {
+      "amountPaise": 50000,
+      "utr": "426112345678",
+      "otherIds": ["CICAgKDx1b3fSA"],
+      "status": "success",
+      "timestampText": "6 Sept 2026, 12:41 pm",
+      "payeeUpiId": "sherwin@oksbi",
+      "payerName": "MURUGAN",
+      "payerBankMask": "XX4321"
+    },
+    "expectedVerdict": "Match"
+  },
+  {
+    "file": "phonepe_genuine_photo.png",
+    "app": "phonepe",
+    "case": "genuine_photo",
+    "expected": {
+      "amountPaise": 50000,
+      "utr": "426112345678",
+      "otherIds": ["T2609061241123456789012"],
+      "status": "success",
+      "timestampText": "06 Sep 2026, 12:41 pm",
+      "payeeUpiId": "sherwin@ybl",
+      "payerName": null,
+      "payerBankMask": "XXXXXX4321"
+    },
+    "expectedVerdict": "Match"
+  }
+]

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CrossCheck</string>
+
+    <!-- Spoken strings (TTS). %1$s = formatted amount, %2$s = payer name. -->
+    <string name="tts_payment_received">%1$s received from %2$s.</string>
+    <string name="tts_unknown_sender">an unknown sender</string>
+
+    <!-- Log screen -->
+    <string name="log_title">Today</string>
+    <string name="log_section_payments">Confirmed payments</string>
+    <string name="log_section_flagged">Flagged mismatches</string>
+    <string name="log_empty_payments">No payments received yet today.</string>
+    <string name="log_empty_flagged">No mismatches today.</string>
+    <string name="log_verify_claim">Verify a claim</string>
+    <string name="log_voice_query">Voice query</string>
+    <string name="log_source_sms">SMS</string>
+    <string name="log_source_notification">Notification</string>
+    <string name="log_no_utr">No UTR</string>
+    <string name="log_dump_db">Dump DB to logcat</string>
+    <string name="log_dumped">Rows written to logcat (tag CrossCheckDB)</string>
+    <string name="log_total_today">%1$d payments · %2$s</string>
+
+    <!-- Placeholders for routes that later phases fill in -->
+    <string name="placeholder_verify_title">Verify a claim</string>
+    <string name="placeholder_verify_body">Camera-based claim verification arrives in the next phase.</string>
+    <string name="placeholder_voice_title">Voice query</string>
+    <string name="placeholder_voice_body">Spoken queries over the payment log arrive in a later phase.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_locale">Speech language</string>
+    <string name="settings_locale_ta">Tamil (ta-IN)</string>
+    <string name="settings_locale_en">English, India (en-IN)</string>
+    <string name="settings_locale_hi">Hindi (hi-IN)</string>
+    <string name="settings_sources">Signal sources</string>
+    <string name="settings_source_sms">Bank SMS</string>
+    <string name="settings_source_notification">App notifications</string>
+    <string name="settings_trusted_packages">Trusted notification apps</string>
+    <string name="settings_trusted_shell">Shell (adb test notifications)</string>
+    <string name="settings_open_listener">Open notification access settings</string>
+    <string name="settings_request_permissions">Request permissions</string>
+    <string name="settings_test_tts">Test speech</string>
+    <string name="settings_listener_enabled">Notification access: granted</string>
+    <string name="settings_listener_disabled">Notification access: not granted</string>
+
+    <!-- Permissions gate -->
+    <string name="perm_title">Permissions</string>
+    <string name="perm_intro">CrossCheck only reads this phone\'s own bank alerts. Nothing leaves the device.</string>
+    <string name="perm_receive_sms">Receive SMS</string>
+    <string name="perm_receive_sms_why">Hear bank credit alerts the moment they arrive.</string>
+    <string name="perm_post_notifications">Notifications</string>
+    <string name="perm_post_notifications_why">Show confirmations while the app is in the background.</string>
+    <string name="perm_camera">Camera</string>
+    <string name="perm_camera_why">Read a customer\'s payment-success screen when verifying a claim.</string>
+    <string name="perm_record_audio">Microphone</string>
+    <string name="perm_record_audio_why">Ask questions like \"did Murugan pay 500 today?\"</string>
+    <string name="perm_granted">Granted</string>
+    <string name="perm_denied">Not granted</string>
+    <string name="perm_denied_permanently">Denied. Enable it in system settings.</string>
+    <string name="perm_request">Grant</string>
+    <string name="perm_open_settings">Open app settings</string>
+    <string name="perm_continue">Continue</string>
+
+    <!-- Navigation -->
+    <string name="nav_back">Back</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_permissions">Permissions</string>
+
+    <!-- Verdicts (spoken + shown; used by later phases, defined once here) -->
+    <string name="verdict_match">MATCH</string>
+    <string name="verdict_likely">LIKELY MATCH</string>
+    <string name="verdict_nomatch">NO MATCH</string>
+    <string name="tts_verdict_match">MATCH — payment confirmed.</string>
+    <string name="tts_verdict_likely">LIKELY MATCH — %1$s, confirm manually.</string>
+    <string name="tts_verdict_nomatch">NO MATCH — %1$s.</string>
+    <string name="tts_verdict_pending">NO MATCH — payment still pending on the customer\'s side.</string>
+    <string name="tts_repeat_offender">Note: this payer has failed verification %1$d times before.</string>
+    <string name="reason_wrong_amount">wrong amount</string>
+    <string name="reason_wrong_utr">UTR does not match</string>
+    <string name="reason_nothing_received">nothing received for this claim</string>
+    <string name="reason_timestamp_mismatch">time does not match</string>
+    <string name="reason_pending">payment still pending</string>
+</resources>

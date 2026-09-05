@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spoken strings (TTS). %1$s = formatted amount, %2$s = payer name. -->
+    <string name="tts_payment_received">%2$s से %1$s प्राप्त हुए.</string>
+    <string name="tts_unknown_sender">अज्ञात भेजने वाला</string>
+
+    <string name="verdict_match">मिलान हुआ</string>
+    <string name="verdict_likely">संभवतः मिलान</string>
+    <string name="verdict_nomatch">मिलान नहीं</string>
+    <string name="tts_verdict_match">मिलान हुआ — भुगतान की पुष्टि हो गई.</string>
+    <string name="tts_verdict_likely">संभवतः मिलान — %1$s, मैन्युअल रूप से पुष्टि करें.</string>
+    <string name="tts_verdict_nomatch">मिलान नहीं — %1$s.</string>
+    <string name="tts_verdict_pending">मिलान नहीं — ग्राहक की ओर से भुगतान अभी भी लंबित है.</string>
+    <string name="tts_repeat_offender">ध्यान दें: यह भुगतानकर्ता पहले %1$d बार सत्यापन में विफल रहा है.</string>
+    <string name="reason_wrong_amount">राशि गलत है</string>
+    <string name="reason_wrong_utr">UTR मेल नहीं खाता</string>
+    <string name="reason_nothing_received">इस दावे के लिए कुछ प्राप्त नहीं हुआ</string>
+    <string name="reason_timestamp_mismatch">समय मेल नहीं खाता</string>
+    <string name="reason_pending">भुगतान अभी भी लंबित है</string>
+</resources>

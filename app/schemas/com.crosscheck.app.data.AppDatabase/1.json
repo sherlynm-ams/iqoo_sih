@@ -1,0 +1,234 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "9683aa42fa8e8f6ed7bb99b1072d693e",
+    "entities": [
+      {
+        "tableName": "payments",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `amountPaise` INTEGER NOT NULL, `sender` TEXT NOT NULL, `utr` TEXT, `timestamp` INTEGER NOT NULL, `source` TEXT NOT NULL, `raw` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountPaise",
+            "columnName": "amountPaise",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sender",
+            "columnName": "sender",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "utr",
+            "columnName": "utr",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "raw",
+            "columnName": "raw",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_payments_utr",
+            "unique": false,
+            "columnNames": [
+              "utr"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_payments_utr` ON `${TABLE_NAME}` (`utr`)"
+          },
+          {
+            "name": "index_payments_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_payments_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          },
+          {
+            "name": "index_payments_amountPaise_timestamp",
+            "unique": false,
+            "columnNames": [
+              "amountPaise",
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_payments_amountPaise_timestamp` ON `${TABLE_NAME}` (`amountPaise`, `timestamp`)"
+          }
+        ]
+      },
+      {
+        "tableName": "claims",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `amountPaise` INTEGER NOT NULL, `upiId` TEXT, `utr` TEXT, `claimedTimestamp` INTEGER, `verdict` TEXT NOT NULL, `reason` TEXT, `createdAt` INTEGER NOT NULL, `extractorBackend` TEXT NOT NULL, `payerName` TEXT, `payerBankMask` TEXT, `payerKey` TEXT, `keyKind` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountPaise",
+            "columnName": "amountPaise",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "upiId",
+            "columnName": "upiId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "utr",
+            "columnName": "utr",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "claimedTimestamp",
+            "columnName": "claimedTimestamp",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "verdict",
+            "columnName": "verdict",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reason",
+            "columnName": "reason",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "extractorBackend",
+            "columnName": "extractorBackend",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "payerName",
+            "columnName": "payerName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "payerBankMask",
+            "columnName": "payerBankMask",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "payerKey",
+            "columnName": "payerKey",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "keyKind",
+            "columnName": "keyKind",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_claims_createdAt",
+            "unique": false,
+            "columnNames": [
+              "createdAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_claims_createdAt` ON `${TABLE_NAME}` (`createdAt`)"
+          },
+          {
+            "name": "index_claims_payerKey",
+            "unique": false,
+            "columnNames": [
+              "payerKey"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_claims_payerKey` ON `${TABLE_NAME}` (`payerKey`)"
+          }
+        ]
+      },
+      {
+        "tableName": "flagged_vpas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`payerKey` TEXT NOT NULL, `keyKind` TEXT NOT NULL, `failCount` INTEGER NOT NULL, `lastFailedAt` INTEGER NOT NULL, PRIMARY KEY(`payerKey`))",
+        "fields": [
+          {
+            "fieldPath": "payerKey",
+            "columnName": "payerKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "keyKind",
+            "columnName": "keyKind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "failCount",
+            "columnName": "failCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastFailedAt",
+            "columnName": "lastFailedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "payerKey"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9683aa42fa8e8f6ed7bb99b1072d693e')"
+    ]
+  }
+}

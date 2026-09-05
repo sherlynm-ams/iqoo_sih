@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spoken strings (TTS). %1$s = formatted amount, %2$s = payer name. -->
+    <string name="tts_payment_received">%2$s அனுப்பிய %1$s பெறப்பட்டது.</string>
+    <string name="tts_unknown_sender">தெரியாத நபர்</string>
+
+    <string name="verdict_match">பொருந்துகிறது</string>
+    <string name="verdict_likely">பெரும்பாலும் பொருந்துகிறது</string>
+    <string name="verdict_nomatch">பொருந்தவில்லை</string>
+    <string name="tts_verdict_match">பொருந்துகிறது — பணம் உறுதி செய்யப்பட்டது.</string>
+    <string name="tts_verdict_likely">பெரும்பாலும் பொருந்துகிறது — %1$s, கைமுறையாக உறுதிப்படுத்தவும்.</string>
+    <string name="tts_verdict_nomatch">பொருந்தவில்லை — %1$s.</string>
+    <string name="tts_verdict_pending">பொருந்தவில்லை — வாடிக்கையாளர் தரப்பில் பணம் இன்னும் நிலுவையில் உள்ளது.</string>
+    <string name="tts_repeat_offender">குறிப்பு: இந்த நபர் இதற்கு முன் %1$d முறை சரிபார்ப்பில் தோல்வியடைந்துள்ளார்.</string>
+    <string name="reason_wrong_amount">தொகை தவறு</string>
+    <string name="reason_wrong_utr">UTR பொருந்தவில்லை</string>
+    <string name="reason_nothing_received">இந்த கோரிக்கைக்கு எதுவும் பெறப்படவில்லை</string>
+    <string name="reason_timestamp_mismatch">நேரம் பொருந்தவில்லை</string>
+    <string name="reason_pending">பணம் இன்னும் நிலுவையில் உள்ளது</string>
+</resources>
