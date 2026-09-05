@@ -26,13 +26,22 @@ class PaymentIngestor(
         data object NotACredit : IngestResult()
     }
 
-    suspend fun ingestRaw(signal: RawSignal): IngestResult {
+    /**
+     * [announce] = false persists without speaking; the SMS path uses it and hands the utterance to
+     * [com.crosscheck.app.voice.SpeakService] so speech survives the receiver's short background window.
+     */
+    suspend fun ingestRaw(signal: RawSignal, announce: Boolean = true): IngestResult {
         val trusted = signal.senderTrusted ?: SenderTrust.isTrustedSmsSender(signal.senderId)
         val parsed = BankSmsParser.parse(signal.text, signal.senderId, trusted) ?: return IngestResult.NotACredit
-        return ingest(parsed, signal.source, signal.receivedAt)
+        return ingest(parsed, signal.source, signal.receivedAt, announce)
     }
 
-    suspend fun ingest(parsed: ParsedCredit, source: String, receivedAt: Long = clock()): IngestResult {
+    suspend fun ingest(
+        parsed: ParsedCredit,
+        source: String,
+        receivedAt: Long = clock(),
+        announce: Boolean = true,
+    ): IngestResult {
         val sender = parsed.payer.orEmpty()
         val utr = parsed.utr
 
@@ -58,7 +67,7 @@ class PaymentIngestor(
         )
         val id = payments.insert(entity)
         val stored = entity.copy(id = id)
-        announcer.announcePayment(stored.amountPaise, parsed.payer)
+        if (announce) announcer.announcePayment(stored.amountPaise, parsed.payer)
         return IngestResult.Inserted(stored)
     }
 

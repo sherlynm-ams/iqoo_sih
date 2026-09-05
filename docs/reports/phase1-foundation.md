@@ -140,5 +140,5 @@ Notification-listener access on API 36 for a sideloaded debug APK: `cmd notifica
 - TTS output was verified through the progress listener only (headless emulator, `-no-audio`); actual audio not heard.
 - Hindi (`hi-IN`) and English voices were not switched at runtime during the gate (only the code path + `ta-IN` was exercised); the fallback branch (`ta-IN` missing → `en-IN`) is implemented and logged but did not trigger because the Play image ships a Tamil voice.
 - Notification-listener behaviour with real bank apps (non-shell packages) is untested — only `com.android.shell` was available.
-- Alphanumeric sender IDs cannot be injected on the emulator, so `senderTrusted=true` on the SMS path is covered by unit tests only.
+- `senderTrusted=true` on the SMS path was covered by unit tests only during the Phase 1 gate; the research pass later showed `adb emu sms send AD-SBIINB-S "…"` does deliver alphanumeric senders on emulator 36.x (see BUILD.md), so this is now exercisable on the emulator.
 - The Verify and Voice routes are placeholders by design (Phase 2 / step 4).

@@ -82,11 +82,16 @@ Notes:
 
 ## Test recipes (what the Phase 1 gate used)
 
-Inject a bank SMS (numeric sender only — the console cannot spoof alphanumeric IDs):
+Inject a bank SMS. The emulator console accepts **alphanumeric DLT senders too** (verified on emulator 36.x — see `docs/research/bank-sms-templates.md` §4), so both trust paths can be exercised:
 
 ```powershell
+# trusted DLT header -> senderTrusted=true, a missing UTR is tolerated
+adb emu sms send AD-SBIINB-S "Rs.500.00 credited to A/c XX1234 on 06-09-26 by UPI Ref No 624912345678 from MURUGAN. -SBI"
+# 10-digit / unknown sender -> senderTrusted=false; accepted only because it carries a full 12-digit UTR
 adb emu sms send 5551234 "Rs.500.00 credited to A/c XX1234 on 06-09-26 by UPI Ref No 426112345678 from MURUGAN. -SBI"
 ```
+
+What to expect after the Phase 1 hardening (branch `harden/phase1`): the receiver logs `CrossCheckSMS: … result=Inserted`, then starts the `shortService` foreground service `SpeakService` — a low-importance notification "Announcing payment…" appears for the duration of the utterance and `CrossCheckFGS: speaking id=cc-N …` / `utterance cc-N finished ok=true` bracket the `CrossCheckTTS: onStart/onDone` lines. Confirm the service came and went with `adb shell dumpsys activity services com.crosscheck.app` (empty once done). If `startForegroundService` is refused, the receiver logs `SpeakService unavailable; speaking directly` and still speaks.
 
 Post a fake bank notification. **Quoting matters**: in PowerShell wrap the whole remote command in one string and use single quotes inside, otherwise the device shell re-splits `"HDFC Bank"` into title/tag/text and the body is lost:
 
@@ -97,10 +102,11 @@ adb shell "cmd notification post -S bigtext -t 'HDFC Bank' tag1 'Rs.750.00 credi
 Read the evidence:
 
 ```powershell
-adb logcat -d -s CrossCheckTTS CrossCheckSMS CrossCheckNotif CrossCheckDB
+adb logcat -d -s CrossCheckTTS CrossCheckSMS CrossCheckNotif CrossCheckFGS CrossCheckDB
 ```
 
-- `CrossCheckSMS` / `CrossCheckNotif`: `result=Inserted | Duplicate | NotACredit` per signal.
+- `CrossCheckSMS` / `CrossCheckNotif`: `result=Inserted | Duplicate | NotACredit` per signal. The Messages app's own notification of an injected SMS is *not* in the trusted-package set, so it never reaches the ingestor; if you add it, it dedups on UTR (unit-tested).
+- `CrossCheckFGS`: `SpeakService` lifecycle (SMS path only).
 - `CrossCheckTTS`: `locale requested=… using=…`, then `onStart id=… text="…"` / `onDone …` per utterance.
 - `CrossCheckDB`: every row of every table — produced by the debug-only **ⓘ** action in the Log screen top bar (tap it, or `adb shell input tap 754 146` on the 1080×2400 AVD). `run-as com.crosscheck.app sqlite3` is **not** available on this image.
 

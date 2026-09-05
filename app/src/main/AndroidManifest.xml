@@ -7,6 +7,8 @@
     <!-- Mode 2 (camera) and voice query (mic) - requested at runtime from the permissions gate. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- shortService FGS that speaks the SMS confirmation (no per-type permission exists for shortService). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
@@ -56,5 +58,10 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
+
+        <service
+            android:name=".voice.SpeakService"
+            android:exported="false"
+            android:foregroundServiceType="shortService" />
     </application>
 </manifest>

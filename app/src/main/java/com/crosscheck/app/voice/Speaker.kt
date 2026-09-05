@@ -31,6 +31,7 @@ class Speaker(
     private val appContext: Context = context.applicationContext
     private val counter = AtomicInteger()
     private val texts = ConcurrentHashMap<String, String>()
+    private val completions = ConcurrentHashMap<String, UtteranceCallback>()
     private val pending = ArrayDeque<Pair<String, String>>()
     private val lock = Any()
 
@@ -54,6 +55,12 @@ class Speaker(
             toFlush.forEach { (id, text) -> enqueue(id, text) }
         } else {
             Log.e(TAG, "TextToSpeech init failed status=$status")
+            val dropped: List<Pair<String, String>>
+            synchronized(lock) {
+                dropped = pending.toList()
+                pending.clear()
+            }
+            dropped.forEach { (id, _) -> finish(id, ok = false) }
         }
     }
 
@@ -64,18 +71,31 @@ class Speaker(
             }
 
             override fun onDone(utteranceId: String) {
-                Log.i(TAG, "onDone id=$utteranceId text=\"${texts.remove(utteranceId)}\"")
+                Log.i(TAG, "onDone id=$utteranceId text=\"${texts[utteranceId]}\"")
+                finish(utteranceId, ok = true)
             }
 
             @Deprecated("Deprecated in Java")
             override fun onError(utteranceId: String) {
-                Log.e(TAG, "onError id=$utteranceId text=\"${texts.remove(utteranceId)}\"")
+                Log.e(TAG, "onError id=$utteranceId text=\"${texts[utteranceId]}\"")
+                finish(utteranceId, ok = false)
             }
 
             override fun onError(utteranceId: String, errorCode: Int) {
-                Log.e(TAG, "onError id=$utteranceId code=$errorCode text=\"${texts.remove(utteranceId)}\"")
+                Log.e(TAG, "onError id=$utteranceId code=$errorCode text=\"${texts[utteranceId]}\"")
+                finish(utteranceId, ok = false)
             }
         })
+    }
+
+    /** Invoked once per utterance with its id and whether it finished normally. */
+    fun interface UtteranceCallback {
+        fun onFinished(utteranceId: String, ok: Boolean)
+    }
+
+    private fun finish(id: String, ok: Boolean) {
+        texts.remove(id)
+        completions.remove(id)?.onFinished(id, ok)
     }
 
     fun setLocale(tag: String) {
@@ -83,10 +103,14 @@ class Speaker(
         if (ready) applyLocale(tag)
     }
 
-    /** Speaks [text]; returns the utterance id. Queued until the engine is ready. */
-    fun speak(text: String): String {
+    /**
+     * Speaks [text]; returns the utterance id. Queued until the engine is ready. [onComplete] fires
+     * on done/error (or immediately with ok=false if the engine failed to initialise).
+     */
+    fun speak(text: String, onComplete: UtteranceCallback? = null): String {
         val id = "cc-" + counter.incrementAndGet()
         texts[id] = text
+        if (onComplete != null) completions[id] = onComplete
         val queueNow: Boolean
         synchronized(lock) {
             queueNow = ready
@@ -97,8 +121,13 @@ class Speaker(
     }
 
     override fun announcePayment(amountPaise: Long, payer: String?) {
+        speak(paymentAnnouncement(amountPaise, payer))
+    }
+
+    /** The localized "amount received from payer" sentence, without speaking it. */
+    fun paymentAnnouncement(amountPaise: Long, payer: String?): String {
         val name = payer?.takeIf { it.isNotBlank() } ?: localizedString(R.string.tts_unknown_sender)
-        speak(localizedString(R.string.tts_payment_received, formatRupees(amountPaise), name))
+        return localizedString(R.string.tts_payment_received, formatRupees(amountPaise), name)
     }
 
     /** Resolves a string resource in the current speech locale (not the UI locale). */
@@ -116,7 +145,10 @@ class Speaker(
     private fun enqueue(id: String, text: String) {
         val params = Bundle()
         val rc = tts.speak(text, TextToSpeech.QUEUE_ADD, params, id)
-        if (rc != TextToSpeech.SUCCESS) Log.e(TAG, "speak() rejected id=$id rc=$rc text=\"$text\"")
+        if (rc != TextToSpeech.SUCCESS) {
+            Log.e(TAG, "speak() rejected id=$id rc=$rc text=\"$text\"")
+            finish(id, ok = false)
+        }
     }
 
     private fun applyLocale(tag: String) {

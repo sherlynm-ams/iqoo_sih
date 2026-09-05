@@ -112,4 +112,53 @@ class PaymentIngestorTest {
         assertEquals("", (r as PaymentIngestor.IngestResult.Inserted).payment.sender)
         assertEquals(listOf(50_000L to null), spoken)
     }
+
+    @Test
+    fun announce_false_persists_without_speaking() = runTest {
+        val r = ingestor.ingest(parsed(), PaymentSource.SMS, t0, announce = false)
+        assertTrue(r is PaymentIngestor.IngestResult.Inserted)
+        assertEquals(1, repo.rows.size)
+        assertTrue(spoken.isEmpty())
+    }
+
+    @Test
+    fun one_credit_via_bank_sms_gpay_notification_and_messages_app_notification_is_one_row() = runTest {
+        val smsBody = "Rs.500.00 credited to A/c XX1234 on 06-09-26 by UPI Ref No 426112345678 from MURUGAN. -SBI"
+        // 1. Bank SMS through the receiver (spoken later by the foreground service, hence announce=false).
+        val sms = ingestor.ingestRaw(RawSignal(PaymentSource.SMS, "AD-SBIINB-S", null, smsBody, t0), announce = false)
+        // 2. Google Pay's own notification for the same UPI credit (title + "\n" + body).
+        val gpay = ingestor.ingestRaw(
+            RawSignal(
+                PaymentSource.NOTIFICATION,
+                "com.google.android.apps.nbu.paisa.user",
+                true,
+                "Murugan paid you ₹500\nUPI transaction ID: 426112345678",
+                t0 + 15_000,
+            ),
+        )
+        // 3. The Messages app's notification of the injected SMS (title = sender, body = SMS text).
+        val messagesApp = ingestor.ingestRaw(
+            RawSignal(PaymentSource.NOTIFICATION, "com.google.android.apps.messaging", true, "AD-SBIINB-S\n$smsBody", t0 + 1_000),
+        )
+        assertTrue(sms is PaymentIngestor.IngestResult.Inserted)
+        assertTrue(gpay is PaymentIngestor.IngestResult.Duplicate)
+        assertTrue(messagesApp is PaymentIngestor.IngestResult.Duplicate)
+        assertEquals(1, repo.rows.size)
+        assertTrue(spoken.isEmpty())
+    }
+
+    @Test
+    fun one_credit_without_utr_via_sms_and_app_notification_dedups_on_amount_and_payer() = runTest {
+        // Paytm Payments Bank SMS carries no UTR (corpus paytmpb-upi-credit-1).
+        val sms = ingestor.ingestRaw(
+            RawSignal(PaymentSource.SMS, "VM-PAYTMB-S", null, "Rs.250.00 received from MURUGAN in your Paytm Payments Bank a/c 91XX1234.", t0),
+            announce = false,
+        )
+        val app = ingestor.ingestRaw(
+            RawSignal(PaymentSource.NOTIFICATION, "com.phonepe.app", true, "Received ₹250 from Murugan\nMoney received in your a/c", t0 + 90_000),
+        )
+        assertTrue(sms is PaymentIngestor.IngestResult.Inserted)
+        assertTrue(app is PaymentIngestor.IngestResult.Duplicate)
+        assertEquals(1, repo.rows.size)
+    }
 }

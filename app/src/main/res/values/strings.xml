@@ -81,4 +81,8 @@
     <string name="reason_nothing_received">nothing received for this claim</string>
     <string name="reason_timestamp_mismatch">time does not match</string>
     <string name="reason_pending">payment still pending</string>
+
+    <!-- Foreground service that speaks SMS confirmations (SpeakService) -->
+    <string name="tts_channel_name">Spoken confirmations</string>
+    <string name="tts_fgs_title">Announcing payment…</string>
 </resources>

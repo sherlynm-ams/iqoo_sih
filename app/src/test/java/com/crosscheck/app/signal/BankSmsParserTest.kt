@@ -9,8 +9,9 @@ import org.junit.Test
 
 class BankSmsParserTest {
 
-    private fun credit(body: String, sender: String? = null): ParsedCredit {
-        val parsed = BankSmsParser.parse(body, sender)
+    /** [trusted] = null derives trust from the sender like the SMS path; true mimics the notification listener. */
+    private fun credit(body: String, sender: String? = null, trusted: Boolean? = null): ParsedCredit {
+        val parsed = if (trusted == null) BankSmsParser.parse(body, sender) else BankSmsParser.parse(body, sender, trusted)
         assertNotNull("expected a credit for: $body", parsed)
         return parsed!!
     }
@@ -187,7 +188,7 @@ class BankSmsParserTest {
 
     @Test
     fun gpay_notification_paid_you() {
-        val p = credit("Murugan S paid you ₹500", "com.google.android.apps.nbu.paisa.user")
+        val p = credit("Murugan S paid you ₹500", "com.google.android.apps.nbu.paisa.user", trusted = true)
         assertEquals(50_000L, p.amountPaise)
         assertNull(p.utr)
         assertEquals("Murugan S", p.payer)
@@ -195,10 +196,59 @@ class BankSmsParserTest {
 
     @Test
     fun gpay_notification_received_from() {
-        val p = credit("Google Pay ₹1,000 received from Murugan S")
+        val p = credit("Google Pay\n₹1,000 received from Murugan S", "com.google.android.apps.nbu.paisa.user", trusted = true)
         assertEquals(100_000L, p.amountPaise)
         assertEquals("Murugan S", p.payer)
         assertNull(p.utr)
+    }
+
+    @Test
+    fun untrusted_sender_without_a_twelve_digit_reference_is_rejected() {
+        // Same text, no reference: fine from a bank header, rejected from a 10-digit number / unknown sender.
+        val body = "Rs.100.00 credited to your A/c XX1234 on 06-09-26. -SBI"
+        assertNotNull(BankSmsParser.parse(body, "AD-SBIINB-S"))
+        assertNull(BankSmsParser.parse(body, "9812345678"))
+        assertNull(BankSmsParser.parse(body, null))
+        // An 11-digit reference is not a UTR either.
+        assertNull(BankSmsParser.parse("Rs 18,000 credited to a/c XX5432 by VPA x@y (UPI Ref No 41246673198.", "+919876543210"))
+        // With a real 12-digit UTR the numeric emulator sender is accepted (senderTrusted=false is recorded).
+        val p = BankSmsParser.parse("Rs 18,000 credited to a/c XX5432 by VPA x@y (UPI Ref No 412466731981)", "5551234")
+        assertNotNull(p)
+        assertFalse(p!!.senderTrusted)
+    }
+
+    /**
+     * Pins the rule that rejects each corpus scam entry: the first two bodies are otherwise
+     * well-formed credits (they parse from a trusted header), so only the untrusted-sender
+     * 12-digit guard stops them; the third is stopped by the refund/reversal rule before trust matters.
+     */
+    @Test
+    fun scam_entries_are_rejected_by_the_documented_rule() {
+        val lookalike11 = "Rs 18,000 credited to a/c XXXXX5432 on 10-05-24 by a/c linked to VPA XXXX5432 (UPI Ref No 41246673198."
+        assertNull(BankSmsParser.parse(lookalike11, "+919876543210"))
+        assertEquals("41246673198", BankSmsParser.parse(lookalike11, "AD-HDFCBK-S")?.utr) // 11-digit ref, trusted -> kept as partial
+
+        val noRef = "₹4,800 credited to your A/c XX7843. Available balance: ₹12,340."
+        assertNull(BankSmsParser.parse(noRef, "9812345678"))
+        assertEquals(480_000L, BankSmsParser.parse(noRef, "AD-SBIINB-S")?.amountPaise)
+
+        val refundBait = "Dear SBI UPI User, ur A/cX1234 credited by Rs9500 on 06Sep26 by (Ref no 42611234567). Please refund wrongly sent amount to 9812345678@paytm"
+        assertNull(BankSmsParser.parse(refundBait, "SBI-ALERT"))
+        assertNull(BankSmsParser.parse(refundBait, "AD-SBIUPI-S")) // refund rule, independent of sender
+    }
+
+    @Test
+    fun promo_dlt_header_is_rejected_regardless_of_body() {
+        assertNull(BankSmsParser.parse("Rs.500.00 credited to A/c XX1234 by UPI Ref No 624912345678 from MURUGAN", "AD-HDFCBK-P"))
+    }
+
+    @Test
+    fun paid_to_you_is_a_credit_but_paid_and_sent_are_debits() {
+        assertNotNull(BankSmsParser.parse("Rs.300.00 credited by UPI/CR/624912345689/MURUGAN/OKAXIS/paid to you", "AD-UNIONB-S"))
+        assertNull(BankSmsParser.parse("Sent Rs.100.00\nFrom HDFC Bank A/C *5095\nTo x@okaxis\nRef 624912345678", "AD-HDFCBK-S"))
+        assertNull(BankSmsParser.parse("Rs 500 paid from A/c XX1234 to MURUGAN. Ref 624912345678", "AD-SBIINB-S"))
+        assertNull(BankSmsParser.parse("Rs.450.00 credited to A/c XX1234 as UPI transaction reversal. Ref 612345678901.", "AD-SBIINB-S"))
+        assertNull(BankSmsParser.parse("Payment of Rs.5,000.00 received towards your Credit Card XX1234", "VM-KOTAKB-T"))
     }
 
     @Test
@@ -219,7 +269,7 @@ class BankSmsParserTest {
 
     @Test
     fun credit_without_any_reference_or_payer() {
-        val p = credit("Rs.100.00 credited to your A/c XX1234 on 06-09-26. -SBI")
+        val p = credit("Rs.100.00 credited to your A/c XX1234 on 06-09-26. -SBI", "AD-SBIINB-S")
         assertEquals(10_000L, p.amountPaise)
         assertNull(p.utr)
         assertNull(p.payer)
@@ -303,5 +353,7 @@ class BankSmsParserTest {
         assertFalse(SenderTrust.isTrustedSmsSender(null))
         assertFalse(SenderTrust.isTrustedSmsSender(""))
         assertFalse(SenderTrust.isTrustedSmsSender("AMAZON"))
+        assertFalse(SenderTrust.isTrustedSmsSender("SBI-ALERT"))
+        assertFalse(SenderTrust.isTrustedSmsSender("AD-HDFCBK-P"))
     }
 }

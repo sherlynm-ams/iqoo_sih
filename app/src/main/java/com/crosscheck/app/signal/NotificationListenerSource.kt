@@ -18,9 +18,10 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
- * Mode 1 production path: reads title + text + bigText of notifications posted by packages in the
+ * Mode 1 production path: reads title + (bigText or text) of notifications posted by packages in the
  * user's trusted set (Settings). Access is granted through the system notification-listener page
  * or, on the emulator, `adb shell cmd notification allow_listener <component>`.
+ * The service is system-bound, so it speaks directly (no foreground service needed here).
  */
 class NotificationListenerSource : NotificationListenerService(), PaymentSignalSource {
 
@@ -67,11 +68,12 @@ class NotificationListenerSource : NotificationListenerService(), PaymentSignalS
     companion object {
         private const val TAG = "CrossCheckNotif"
 
-        fun extractText(extras: Bundle): String =
-            listOf(Notification.EXTRA_TITLE, Notification.EXTRA_TEXT, Notification.EXTRA_BIG_TEXT)
-                .mapNotNull { key -> extras.getCharSequence(key)?.toString()?.trim()?.takeIf { it.isNotEmpty() } }
-                .distinct()
-                .joinToString(" ")
+        /** title + "\n" + (bigText ?: text) - see [NotificationText]. */
+        fun extractText(extras: Bundle): String = NotificationText.compose(
+            title = extras.getCharSequence(Notification.EXTRA_TITLE),
+            text = extras.getCharSequence(Notification.EXTRA_TEXT),
+            bigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT),
+        )
 
         fun component(context: Context): ComponentName =
             ComponentName(context, NotificationListenerSource::class.java)

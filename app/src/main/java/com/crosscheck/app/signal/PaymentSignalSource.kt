@@ -25,6 +25,7 @@ interface PaymentSignalSource {
         senderTrusted: Boolean?,
         text: String,
         receivedAt: Long,
+        announce: Boolean = true,
     ): PaymentIngestor.IngestResult =
-        ingestor.ingestRaw(RawSignal(sourceName, senderId, senderTrusted, text, receivedAt))
+        ingestor.ingestRaw(RawSignal(sourceName, senderId, senderTrusted, text, receivedAt), announce)
 }

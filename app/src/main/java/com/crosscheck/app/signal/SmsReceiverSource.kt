@@ -7,11 +7,17 @@ import android.provider.Telephony
 import android.util.Log
 import com.crosscheck.app.CrossCheckApp
 import com.crosscheck.app.data.PaymentSource
+import com.crosscheck.app.voice.SpeakService
 import kotlinx.coroutines.launch
 
 /**
  * Mode 1 SMS path. Registered in the manifest for SMS_RECEIVED (needs RECEIVE_SMS at runtime).
- * Multipart messages from the same address are concatenated before parsing.
+ *
+ * Background budget (docs/research/bank-sms-templates.md section 3): telephony delivers the
+ * broadcast with a ~20 s temp-allowlist. Parse + insert happen inside [goAsync] (<= 10 s); the
+ * spoken confirmation is handed to [SpeakService], a `shortService` foreground service that owns
+ * the utterance and stops itself on completion, so speech is not cut off when the receiver ends.
+ * If the foreground service cannot be started, it falls back to speaking directly.
  */
 class SmsReceiverSource : BroadcastReceiver(), PaymentSignalSource {
 
@@ -22,8 +28,9 @@ class SmsReceiverSource : BroadcastReceiver(), PaymentSignalSource {
         val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent) ?: return
         if (messages.isEmpty()) return
 
-        val byAddress = messages.groupBy { it.displayOriginatingAddress ?: "" }
+        val parts = messages.map { SmsDelivery.Part(it.displayOriginatingAddress, it.displayMessageBody) }
         val container = CrossCheckApp.from(context).container
+        val appContext = context.applicationContext
         val receivedAt = System.currentTimeMillis()
         val pending = goAsync()
 
@@ -33,10 +40,15 @@ class SmsReceiverSource : BroadcastReceiver(), PaymentSignalSource {
                     Log.i(TAG, "SMS source disabled in settings; ignoring ${messages.size} part(s)")
                     return@launch
                 }
-                for ((address, parts) in byAddress) {
-                    val body = parts.joinToString(separator = "") { it.displayMessageBody.orEmpty() }
-                    val result = deliver(container.ingestor, address, null, body, receivedAt)
-                    Log.i(TAG, "from=$address result=${result::class.simpleName} body=\"${body.take(80)}\"")
+                val delivered = SmsDelivery(container.ingestor).deliver(parts, receivedAt) { payment ->
+                    val text = container.speaker.paymentAnnouncement(payment.amountPaise, payment.sender.takeIf { it.isNotBlank() })
+                    if (!SpeakService.start(appContext, text)) {
+                        Log.w(TAG, "SpeakService unavailable; speaking directly")
+                        container.speaker.speak(text)
+                    }
+                }
+                delivered.forEach {
+                    Log.i(TAG, "from=${it.address} result=${it.result::class.simpleName} body=\"${it.body.take(80)}\"")
                 }
             } finally {
                 pending.finish()
