@@ -25,6 +25,20 @@ class ReportContentTest {
     }
 
     @Test
+    fun csv_field_defuses_leading_formula_triggers() {
+        // payerName/payerBankMask come from OCR text on a stranger's screen: a leading =, +, -, @,
+        // tab or CR must never reach a spreadsheet as a live formula (OWASP CSV injection).
+        assertEquals("'=cmd|'/c calc'!A0", ReportContent.csvField("=cmd|'/c calc'!A0"))
+        assertEquals("'+1+1", ReportContent.csvField("+1+1"))
+        assertEquals("'-1-1", ReportContent.csvField("-1-1"))
+        assertEquals("'@SUM(A1)", ReportContent.csvField("@SUM(A1)"))
+        // a value that also needs RFC 4180 quoting still gets the defusal applied first
+        assertEquals("\"'=HYPERLINK(\"\"x\"\")\"", ReportContent.csvField("=HYPERLINK(\"x\")"))
+        // an ordinary negative-looking number or hyphenated name is untouched by anything but the defusal
+        assertEquals("'-50000", ReportContent.csvField("-50000"))
+    }
+
+    @Test
     fun reconciliation_csv_rows_in_time_order_with_paise_column() {
         val rows = listOf(
             PaymentEntity(2, 75_000, "KUMAR", "624912345678", at(12, 55), PaymentSource.NOTIFICATION, "raw"),

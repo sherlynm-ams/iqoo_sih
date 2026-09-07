@@ -77,9 +77,19 @@ object ReportContent {
         appendLine("Generated ${Instant.ofEpochMilli(generatedAt).atZone(zone).format(DATE_TIME)} on device; no data left the phone.")
     }
 
-    /** RFC 4180 quoting: wrap when the field has a comma, quote, or line break; double the quotes. */
-    fun csvField(value: String): String =
-        if (value.any { it == ',' || it == '"' || it == '\n' || it == '\r' }) "\"" + value.replace("\"", "\"\"") + "\"" else value
+    /** Leading chars a spreadsheet reads as a formula trigger (OWASP CSV-injection mitigation). */
+    private val FORMULA_TRIGGER = charArrayOf('=', '+', '-', '@', '\t', '\r')
+
+    /**
+     * RFC 4180 quoting plus formula-injection defusal: fields are OCR text off a stranger's screen
+     * (payer name, bank mask), so a value crafted as `=cmd|'/c calc'!A0` must not execute when a
+     * seller opens the exported CSV in Excel/Sheets. A leading formula-trigger char is neutralised
+     * with a leading apostrophe *before* RFC 4180 quoting is applied.
+     */
+    fun csvField(value: String): String {
+        val safe = if (value.isNotEmpty() && value[0] in FORMULA_TRIGGER) "'$value" else value
+        return if (safe.any { it == ',' || it == '"' || it == '\n' || it == '\r' }) "\"" + safe.replace("\"", "\"\"") + "\"" else safe
+    }
 
     private fun row(vararg fields: String): String = fields.joinToString(",") { csvField(it) }
 
